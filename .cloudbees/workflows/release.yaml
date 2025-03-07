@@ -26,15 +26,16 @@ kind: workflow
 name: BAU release
 on:
   workflow_dispatch:
-    inputs:
-      workflowId:
-        type: string
-        default: 641f3fa9-d590-4828-a75a-c266d3d8ab5a
-        required: true
-        description: 'This value can be found in the YAML editor URL: workflowId=<grab this value>'
+    # inputs:
+      # workflowId:
+      #   type: string
+      #   default: 641f3fa9-d590-4828-a75a-c266d3d8ab5a
+      #   required: true
+      #   description: 'This value can be found in the YAML editor URL: workflowId=<grab this value>'
 env:
   PAT: ${{ secrets.PAT }}
   CLOUDBEES_API_URL: ${{ cloudbees.api.url }}
+  workflowId: "641f3fa9-d590-4828-a75a-c266d3d8ab5a"
 
 jobs:
   setup:
@@ -45,7 +46,7 @@ jobs:
         id: manifest
         uses: gmaxey/generate-base-manifest
         with:
-          workflowId: ${{ inputs.workflowId }}
+          workflowId: ${{ env.workflowId }}
   
   pre-prod:
     needs: setup
