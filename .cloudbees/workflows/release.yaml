@@ -26,6 +26,34 @@ kind: workflow
 name: BAU release
 on:
   workflow_dispatch:
+    inputs:
+      hackersWebVersion:
+        type: choice
+        options:
+          - latest
+          - v1.2.1
+          - v1.1.3
+          - v1.0.0
+        default: latest
+        description: Pick the version of hackers_web
+      hackersAuthVersion:
+        type: choice
+        options:
+          - latest
+          - v2.4.1
+          - v2.3.4
+          - v2.2.2
+        default: latest
+        description: Pick the version of hackers_auth
+      hackersAPIVersion:
+        type: choice
+        options:
+          - latest
+          - v1.4.3
+          - v1.3.3
+          - v1.2.2
+        default: latest
+        description: Pick the version of hackers_api
     # inputs:
       # workflowId:
       #   type: string
