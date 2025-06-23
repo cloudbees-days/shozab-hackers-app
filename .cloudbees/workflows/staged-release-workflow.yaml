@@ -20,6 +20,7 @@ jobs:
   deploy-to-micro-hacker:
     steps:
       - name: Deploy to micro-hacker
-        uses: docker://golang:1.20.3-alpine3.17
-        shell: sh
-        run: echo "Deploying to micro-hacker"
+        uses: .cloudbees/workflows/deployer.yaml
+        with:
+          manifest: ${{ inputs.manifest }}
+          environment: micro-hacker
