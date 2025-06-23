@@ -18,8 +18,7 @@ metadata:
         - deploy-to-micro-hacker
 jobs:
   deploy-to-micro-hacker:
-    steps:
-        uses: cloudbees-days/hackers-app/.cloudbees/workflows/deployer.yaml
-        with:
-          manifest: ${{ inputs.manifest }}
-          environment: micro-hacker
+    uses: cloudbees-days/hackers-app/.cloudbees/workflows/deployer.yaml
+    with:
+      manifest: ${{ inputs.manifest }}
+      environment: micro-hacker
