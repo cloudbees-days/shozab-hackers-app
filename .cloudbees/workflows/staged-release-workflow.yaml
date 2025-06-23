@@ -22,3 +22,4 @@ jobs:
     with:
       manifest: ${{ inputs.manifest }}
       environment: micro-hacker
+    secrets: inherit
