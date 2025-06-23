@@ -1,0 +1,35 @@
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: deployer
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+      manifest:
+        type: string
+        required: true
+
+jobs:
+  hackers-api:
+    if: ${{ fromJSON(inputs.manifest)['hackers-api']['ldonleycb/hackers-web'].deploy }}
+    uses: cloudbees-days/hackers-api/.cloudbees/workflows/deploy.yaml
+    with:
+      artifactName: hackers-api
+      artifactVersion: ${{ fromJSON(inputs.manifest)['hackers-api']['ldonleycb/hackers-web'].version }}
+      environment: ${{ inputs.environment }}
+  hackers-auth:
+    if: ${{ fromJSON(inputs.manifest)['hackers-auth']['ldonleycb/hackers-auth'].deploy }}
+    uses: cloudbees-days/hackers-auth/.cloudbees/workflows/deploy.yaml
+    with:
+      artifactName: hackers-auth
+      artifactVersion: ${{ fromJSON(inputs.manifest)['hackers-auth']['ldonleycb/hackers-auth'].version }}
+      environment: ${{ inputs.environment }}
+  hackers-web:
+    if: ${{ fromJSON(inputs.manifest)['hackers-web']['ldonleycb/hackers-web'].deploy }}
+    uses: cloudbees-days/hackers-web/.cloudbees/workflows/deploy.yaml
+    with:
+      artifactName: hackers-web
+      artifactVersion: ${{ fromJSON(inputs.manifest)['hackers-web']['ldonleycb/hackers-web'].version }}
+      environment: ${{ inputs.environment }}
