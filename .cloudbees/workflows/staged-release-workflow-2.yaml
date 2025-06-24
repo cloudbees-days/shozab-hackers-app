@@ -1,0 +1,18 @@
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: Staged release workflow
+on:
+  workflow_dispatch:
+    inputs:
+      manifest:
+        type: string
+        required: true
+        default: '{"hackers-api":{"deploy":true,"id":"54352051-f483-4104-ad7e-84d1bfcc1543","ldonleycb/hackers-api":{"deploy":true,"digest":"sha256:b1570955499750e63cf55006a000decfc94ac3c01853d1359e63855fdbbd1e4f","name":"ldonleycb/hackers-api","url":"ldonleycb/hackers-api:da11a905ac993ad9ef30b5e907c59056ae2cdf25","version":"da11a905ac993ad9ef30b5e907c59056ae2cdf25"}},"hackers-auth":{"deploy":true,"id":"cb00547c-c55e-4e27-823f-fdeee859df61","ldonleycb/hackers-auth":{"deploy":true,"digest":"sha256:42518b1b8a461f3ce088ccae3d48c05845b84f491b9b05be892784a5661d05e3","name":"ldonleycb/hackers-auth","url":"ldonleycb/hackers-auth:e176e407837ec3ace39aa1d9c806574d45b11460","version":"e176e407837ec3ace39aa1d9c806574d45b11460"}},"hackers-web":{"deploy":true,"id":"930feef5-2842-49d9-a4c0-5216610aa9e7","ldonleycb/hackers-web":{"deploy":true,"digest":"sha256:10321cd870a8152907e3c6945d81c12650f3a5682fec45c1aad9a777b15c0544","name":"ldonleycb/hackers-web","url":"ldonleycb/hackers-web:9c7a5def9d47fcc767ed895d97b1ad19c09f18e5","version":"9c7a5def9d47fcc767ed895d97b1ad19c09f18e5"}}}'
+
+jobs:
+  deploy-to-micro-hacker:
+    uses: cloudbees-days/hackers-app/.cloudbees/workflows/deployer.yaml
+    with:
+      manifest: ${{ inputs.manifest }}
+      environment: micro-hacker
+    secrets: inherit
