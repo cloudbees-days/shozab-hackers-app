@@ -13,11 +13,11 @@ on:
 
 jobs:
   hackers-api:
-    if: ${{ fromJSON(inputs.manifest)['hackers-api']['ldonleycb/hackers-web'].deploy }}
+    if: ${{ fromJSON(inputs.manifest)['hackers-api']['ldonleycb/hackers-api'].deploy }}
     uses: cloudbees-days/hackers-api/.cloudbees/workflows/deploy.yaml
     with:
       artifactName: hackers-api
-      artifactVersion: ${{ fromJSON(inputs.manifest)['hackers-api']['ldonleycb/hackers-web'].version }}
+      artifactVersion: ${{ fromJSON(inputs.manifest)['hackers-api']['ldonleycb/hackers-api'].version }}
       environment: ${{ inputs.environment }}
     secrets: inherit
   hackers-auth:
