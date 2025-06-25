@@ -18,6 +18,7 @@ jobs:
     with:
       artifactName: hackers-api
       artifactVersion: ${{ fromJSON(inputs.manifest)['hackers-api']['ldonleycb/hackers-api'].version }}
+      digest: ${{ fromJSON(inputs.manifest)['hackers-api']['ldonleycb/hackers-api'].digest }}
       environment: ${{ inputs.environment }}
     secrets: inherit
   hackers-auth:
@@ -26,6 +27,7 @@ jobs:
     with:
       artifactName: hackers-auth
       artifactVersion: ${{ fromJSON(inputs.manifest)['hackers-auth']['ldonleycb/hackers-auth'].version }}
+      digest: ${{ fromJSON(inputs.manifest)['hackers-auth']['ldonleycb/hackers-auth'].digest }}
       environment: ${{ inputs.environment }}
     secrets: inherit
   hackers-web:
@@ -34,5 +36,6 @@ jobs:
     with:
       artifactName: hackers-web
       artifactVersion: ${{ fromJSON(inputs.manifest)['hackers-web']['ldonleycb/hackers-web'].version }}
+      digest: ${{ fromJSON(inputs.manifest)['hackers-web']['ldonleycb/hackers-web'].digest }}
       environment: ${{ inputs.environment }}
     secrets: inherit
