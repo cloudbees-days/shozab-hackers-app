@@ -15,22 +15,22 @@ metadata:
   stages/v1alpha1:
     - name: pre-prod
       jobs:
-        - deploy-to-micro-hacker
+        - deploy-pre-prod
     - name: Production
       jobs:
-        - job
+        - deploy-production
 jobs:
-  deploy-to-micro-hacker:
+  deploy-pre-prod:
     uses: cloudbees-days/hackers-app/.cloudbees/workflows/deployer.yaml
     with:
       manifest: ${{ inputs.manifest }}
       environment: micro-hacker
     secrets: inherit
-  job:
+  deploy-production:
     needs:
-      - deploy-to-micro-hacker
-    steps:
-      - name: Say hello
-        uses: docker://golang:1.20.3-alpine3.17
-        shell: sh
-        run: echo "hello world"
+      - pre-prod
+    uses: cloudbees-days/hackers-app/.cloudbees/workflows/sn-approval.yaml
+    #uses: cloudbees-days/hackers-app/.cloudbees/workflows/deployer.yaml
+    #with:
+      #manifest: ${{ inputs.manifest }}
+      #environment: micro-hacker-production
