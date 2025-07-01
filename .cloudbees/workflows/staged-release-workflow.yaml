@@ -31,6 +31,7 @@ jobs:
     needs:
       - deploy-pre-prod
     uses: cloudbees-days/hackers-app/.cloudbees/workflows/sn-approval.yaml
+    secrets: inherit
   deploy-production:
     needs:
       - SN-approval
@@ -44,3 +45,4 @@ jobs:
     #with:
       #manifest: ${{ inputs.manifest }}
       #environment: hacker-prod
+    #secrets: inherit
