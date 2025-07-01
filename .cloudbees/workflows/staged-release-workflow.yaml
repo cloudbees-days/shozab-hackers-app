@@ -13,9 +13,12 @@ on:
           for the expected format
 metadata:
   stages/v1alpha1:
-    - name: micro-hacker
+    - name: pre-prod
       jobs:
         - deploy-to-micro-hacker
+    - name: Production
+      jobs:
+        - job
 jobs:
   deploy-to-micro-hacker:
     uses: cloudbees-days/hackers-app/.cloudbees/workflows/deployer.yaml
@@ -23,3 +26,11 @@ jobs:
       manifest: ${{ inputs.manifest }}
       environment: micro-hacker
     secrets: inherit
+  job:
+    needs:
+      - deploy-to-micro-hacker
+    steps:
+      - name: Say hello
+        uses: docker://golang:1.20.3-alpine3.17
+        shell: sh
+        run: echo "hello world"
