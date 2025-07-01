@@ -13,11 +13,12 @@ on:
           for the expected format
 metadata:
   stages/v1alpha1:
-    - name: pre-prod
+    - name: Pre-prod
       jobs:
         - deploy-pre-prod
     - name: Production
       jobs:
+        - SN-approval
         - deploy-production
 jobs:
   deploy-pre-prod:
@@ -26,10 +27,19 @@ jobs:
       manifest: ${{ inputs.manifest }}
       environment: micro-hacker
     secrets: inherit
-  deploy-production:
+  SN-approval:
     needs:
       - pre-prod
     uses: cloudbees-days/hackers-app/.cloudbees/workflows/sn-approval.yaml
+  deploy-production:
+    needs:
+      - SN-approval
+    steps:
+      - name: Deploy
+        uses: docker://golang:1.20.3-alpine3.17
+        shell: sh
+        run: |
+          echo Ready to deploy to Production
     #uses: cloudbees-days/hackers-app/.cloudbees/workflows/deployer.yaml
     #with:
       #manifest: ${{ inputs.manifest }}
