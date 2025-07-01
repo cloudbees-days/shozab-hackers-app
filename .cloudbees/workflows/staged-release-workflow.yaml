@@ -32,6 +32,7 @@ jobs:
       - deploy-pre-prod
     uses: cloudbees-days/hackers-app/.cloudbees/workflows/sn-approval.yaml
     secrets: inherit
+    vars: inherit
   deploy-production:
     needs:
       - SN-approval
