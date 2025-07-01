@@ -25,7 +25,7 @@ jobs:
     uses: cloudbees-days/hackers-app/.cloudbees/workflows/deployer.yaml
     with:
       manifest: ${{ inputs.manifest }}
-      environment: micro-hacker
+      environment: hacker-pre
     secrets: inherit
   SN-approval:
     needs:
@@ -43,4 +43,4 @@ jobs:
     #uses: cloudbees-days/hackers-app/.cloudbees/workflows/deployer.yaml
     #with:
       #manifest: ${{ inputs.manifest }}
-      #environment: micro-hacker-production
+      #environment: hacker-prod
