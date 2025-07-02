@@ -17,6 +17,7 @@ metadata:
       jobs:
         - deploy-pre-prod
         - evidence-collection
+        - smokeTest_preprod
     - name: Production
       jobs:
         - SN-approval
@@ -69,15 +70,16 @@ jobs:
         uses: cloudbees-io/publish-evidence-item@v1
         name: Publish evidence
   deploy-pre-prod:
-    needs:
-      - deploy-pre-prod
+    needs: smokeTest_preprod
     uses: cloudbees-days/hackers-app/.cloudbees/workflows/deployer.yaml
     with:
       manifest: ${{ inputs.manifest }}
       environment: hacker-pre
     secrets: inherit
   SN-approval:
-    needs: evidence-collection
+    needs:
+      - smokeTest_preprod
+      - evidence-collection
     uses: cloudbees-days/hackers-app/.cloudbees/workflows/sn-approval.yaml
     secrets: inherit
     vars: inherit
@@ -89,3 +91,17 @@ jobs:
         shell: sh
         run: |
           echo Ready to deploy to Production
+  smokeTest_preprod:
+    needs:
+      - deploy-pre-prod
+    steps:
+      - uses: cloudbees-io/checkout@v1
+        name: Checkout
+      - name: Smoke Test
+        uses: docker://maven:3-eclipse-temurin-17
+        run: mvn test
+        kind: test
+      - with:
+          content: "${{vars.PETCLINIC_SMOKETEST_DEV_RESULTS}} "
+        uses: cloudbees-io/publish-evidence-item@v1
+        name: Publish Results
