@@ -25,6 +25,7 @@ metadata:
         - deploy-production
 jobs:
   evidence-collection:
+  # collecting some evidence here and grabbing JIRA
     outputs:
       commit_id: ${{ steps.commitinfo.outputs.commit_id }}
       commit_msg: ${{ steps.commitinfo.outputs.commit_msg }}
@@ -36,28 +37,19 @@ jobs:
         name: Configure git
       - uses: cloudbees-io/checkout@v1
         name: Checkout
-      - run: >
+      - run: |
           COMMIT_ID=$(git rev-parse HEAD)
-
           COMMIT_MSG=$(git log -1 --pretty=%B)
-
           echo "Commit ID: $COMMIT_ID"
-
           echo "Commit Message: $COMMIT_MSG"
-
           # Extract the JIRA issue key (assuming format like PROJECTKEY-123)
-
           JIRA_KEY=$(echo "$COMMIT_MSG" | grep -oE "[A-Z]+-[0-9]+")
-
           if [ -z "$JIRA_KEY" ]; then
             echo "Error: Commit message must include a valid JIRA issue key." >&2
             exit 1
           fi
-
           echo "${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
-
           echo "${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
-
           echo "${JIRA_KEY}" >> $CLOUDBEES_OUTPUTS/jira_key
         uses: docker://alpine/git:latest
         name: Get Commit Info
@@ -71,16 +63,13 @@ jobs:
         uses: cloudbees-io/publish-evidence-item@v1
         name: Publish evidence
   deploy-pre-prod:
-    needs: exit_gate
+    needs: evidence-collection
     uses: cloudbees-days/hackers-app/.cloudbees/workflows/deployer.yaml
     with:
       manifest: ${{ inputs.manifest }}
       environment: hacker-pre
     secrets: inherit
   SN-approval:
-    needs:
-      - exit_gate
-      - evidence-collection
     uses: cloudbees-days/hackers-app/.cloudbees/workflows/sn-approval.yaml
     secrets: inherit
     vars: inherit
