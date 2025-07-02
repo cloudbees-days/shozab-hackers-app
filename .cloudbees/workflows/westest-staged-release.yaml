@@ -16,6 +16,7 @@ metadata:
     - name: Pre-prod
       jobs:
         - deploy-pre-prod
+        - evidence-collection
     - name: Production
       jobs:
         - SN-approval
@@ -28,22 +29,63 @@ jobs:
       environment: hacker-pre
     secrets: inherit
   SN-approval:
-    needs:
-      - deploy-pre-prod
+    needs: evidence-collection
     uses: cloudbees-days/hackers-app/.cloudbees/workflows/sn-approval.yaml
     secrets: inherit
     vars: inherit
   deploy-production:
-    needs:
-      - SN-approval
+    needs: SN-approval
     steps:
       - name: Deploy
         uses: docker://golang:1.20.3-alpine3.17
         shell: sh
         run: |
           echo Ready to deploy to Production
-    #uses: cloudbees-days/hackers-app/.cloudbees/workflows/deployer.yaml
-    #with:
-      #manifest: ${{ inputs.manifest }}
-      #environment: hacker-prod
-    #secrets: inherit
+  evidence-collection:
+    needs:
+      - deploy-pre-prod
+    outputs:
+      commit_id: ${{ steps.commitinfo.outputs.commit_id }}
+      commit_msg: ${{ steps.commitinfo.outputs.commit_msg }}
+      jira_key: ${{ steps.commitinfo.outputs.jira_key }}
+    steps:
+      - run: |
+          git config --global --add safe.directory /cloudbees/workspace
+        uses: docker://alpine/git:latest
+        name: Configure git
+      - uses: cloudbees-io/checkout@v1
+        name: Checkout
+      - run: >
+          COMMIT_ID=$(git rev-parse HEAD)
+
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+
+          echo "Commit ID: $COMMIT_ID"
+
+          echo "Commit Message: $COMMIT_MSG"
+
+          # Extract the JIRA issue key (assuming format like PROJECTKEY-123)
+
+          JIRA_KEY=$(echo "$COMMIT_MSG" | grep -oE "[A-Z]+-[0-9]+")
+
+          if [ -z "$JIRA_KEY" ]; then
+            echo "Error: Commit message must include a valid JIRA issue key." >&2
+            exit 1
+          fi
+
+          echo "${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
+
+          echo "${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
+
+          echo "${JIRA_KEY}" >> $CLOUDBEES_OUTPUTS/jira_key
+        uses: docker://alpine/git:latest
+        name: Get Commit Info
+      - with:
+          content: |-
+            ## JIRA Information
+            - **JIRA Issue Key:** "${{ steps.commitinfo.outputs.jira_key }}"
+            ## Commit Information
+            - **Commit ID:** "${{ steps.commitinfo.outputs.commit_id }}"
+            - **Commit Message:** "${{ steps.commitinfo.outputs.commit_msg }}" 
+        uses: cloudbees-io/publish-evidence-item@v1
+        name: Publish evidence
