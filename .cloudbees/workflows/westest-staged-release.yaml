@@ -23,8 +23,6 @@ metadata:
         - deploy-production
 jobs:
   evidence-collection:
-    needs:
-      - deploy-pre-prod
     outputs:
       commit_id: ${{ steps.commitinfo.outputs.commit_id }}
       commit_msg: ${{ steps.commitinfo.outputs.commit_msg }}
@@ -71,6 +69,8 @@ jobs:
         uses: cloudbees-io/publish-evidence-item@v1
         name: Publish evidence
   deploy-pre-prod:
+    needs:
+      - deploy-pre-prod
     uses: cloudbees-days/hackers-app/.cloudbees/workflows/deployer.yaml
     with:
       manifest: ${{ inputs.manifest }}
