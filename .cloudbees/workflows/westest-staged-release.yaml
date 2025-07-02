@@ -22,25 +22,6 @@ metadata:
         - SN-approval
         - deploy-production
 jobs:
-  deploy-pre-prod:
-    uses: cloudbees-days/hackers-app/.cloudbees/workflows/deployer.yaml
-    with:
-      manifest: ${{ inputs.manifest }}
-      environment: hacker-pre
-    secrets: inherit
-  SN-approval:
-    needs: evidence-collection
-    uses: cloudbees-days/hackers-app/.cloudbees/workflows/sn-approval.yaml
-    secrets: inherit
-    vars: inherit
-  deploy-production:
-    needs: SN-approval
-    steps:
-      - name: Deploy
-        uses: docker://golang:1.20.3-alpine3.17
-        shell: sh
-        run: |
-          echo Ready to deploy to Production
   evidence-collection:
     needs:
       - deploy-pre-prod
@@ -89,3 +70,22 @@ jobs:
             - **Commit Message:** "${{ steps.commitinfo.outputs.commit_msg }}" 
         uses: cloudbees-io/publish-evidence-item@v1
         name: Publish evidence
+  deploy-pre-prod:
+    uses: cloudbees-days/hackers-app/.cloudbees/workflows/deployer.yaml
+    with:
+      manifest: ${{ inputs.manifest }}
+      environment: hacker-pre
+    secrets: inherit
+  SN-approval:
+    needs: evidence-collection
+    uses: cloudbees-days/hackers-app/.cloudbees/workflows/sn-approval.yaml
+    secrets: inherit
+    vars: inherit
+  deploy-production:
+    needs: SN-approval
+    steps:
+      - name: Deploy
+        uses: docker://golang:1.20.3-alpine3.17
+        shell: sh
+        run: |
+          echo Ready to deploy to Production
