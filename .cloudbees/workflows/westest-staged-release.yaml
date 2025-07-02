@@ -18,6 +18,7 @@ metadata:
         - deploy-pre-prod
         - evidence-collection
         - smokeTest_preprod
+        - exit_gate
     - name: Production
       jobs:
         - SN-approval
@@ -70,7 +71,7 @@ jobs:
         uses: cloudbees-io/publish-evidence-item@v1
         name: Publish evidence
   deploy-pre-prod:
-    needs: smokeTest_preprod
+    needs: exit_gate
     uses: cloudbees-days/hackers-app/.cloudbees/workflows/deployer.yaml
     with:
       manifest: ${{ inputs.manifest }}
@@ -78,7 +79,7 @@ jobs:
     secrets: inherit
   SN-approval:
     needs:
-      - smokeTest_preprod
+      - exit_gate
       - evidence-collection
     uses: cloudbees-days/hackers-app/.cloudbees/workflows/sn-approval.yaml
     secrets: inherit
@@ -92,8 +93,7 @@ jobs:
         run: |
           echo Ready to deploy to Production
   smokeTest_preprod:
-    needs:
-      - deploy-pre-prod
+    needs: deploy-pre-prod
     steps:
       - uses: cloudbees-io/checkout@v1
         name: Checkout
@@ -103,5 +103,15 @@ jobs:
         kind: test
       - with:
           content: "${{vars.PETCLINIC_SMOKETEST_DEV_RESULTS}} "
+        uses: cloudbees-io/publish-evidence-item@v1
+        name: Publish Results
+  exit_gate:
+    needs:
+      - smokeTest_preprod
+    steps:
+      - with:
+          content: |-
+            ## Exit Gates Results
+            ${{vars.PETCLINIC_DEV_EXIT_GATE}} 
         uses: cloudbees-io/publish-evidence-item@v1
         name: Publish Results
