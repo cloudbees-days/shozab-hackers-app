@@ -1,6 +1,6 @@
 apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
-name: WesTest-staged-release
+name: Staged release workflow
 on:
   workflow_dispatch:
     inputs:
@@ -13,13 +13,37 @@ on:
           for the expected format
 metadata:
   stages/v1alpha1:
-    - name: micro-hacker
+    - name: Pre-prod
       jobs:
-        - deploy-to-micro-hacker
+        - deploy-pre-prod
+    - name: Production
+      jobs:
+        - SN-approval
+        - deploy-production
 jobs:
-  deploy-to-micro-hacker:
+  deploy-pre-prod:
+    uses: cloudbees-days/hackers-app/.cloudbees/workflows/deployer.yaml
+    with:
+      manifest: ${{ inputs.manifest }}
+      environment: hacker-pre
+    secrets: inherit
+  SN-approval:
+    needs:
+      - deploy-pre-prod
+    uses: cloudbees-days/hackers-app/.cloudbees/workflows/sn-approval.yaml
+    secrets: inherit
+    vars: inherit
+  deploy-production:
+    needs:
+      - SN-approval
     steps:
-      - name: Deploy to micro-hacker
+      - name: Deploy
         uses: docker://golang:1.20.3-alpine3.17
         shell: sh
-        run: echo "Deploying to micro-hacker"
+        run: |
+          echo Ready to deploy to Production
+    #uses: cloudbees-days/hackers-app/.cloudbees/workflows/deployer.yaml
+    #with:
+      #manifest: ${{ inputs.manifest }}
+      #environment: hacker-prod
+    #secrets: inherit
