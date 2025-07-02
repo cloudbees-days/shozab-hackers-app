@@ -23,9 +23,9 @@ metadata:
       jobs:
         - SN-approval
         - deploy-production
+        - Prod_Approval
 jobs:
   evidence-collection:
-  # collecting some evidence here and grabbing JIRA
     outputs:
       commit_id: ${{ steps.commitinfo.outputs.commit_id }}
       commit_msg: ${{ steps.commitinfo.outputs.commit_msg }}
@@ -37,19 +37,28 @@ jobs:
         name: Configure git
       - uses: cloudbees-io/checkout@v1
         name: Checkout
-      - run: |
+      - run: >
           COMMIT_ID=$(git rev-parse HEAD)
+
           COMMIT_MSG=$(git log -1 --pretty=%B)
+
           echo "Commit ID: $COMMIT_ID"
+
           echo "Commit Message: $COMMIT_MSG"
+
           # Extract the JIRA issue key (assuming format like PROJECTKEY-123)
+
           JIRA_KEY=$(echo "$COMMIT_MSG" | grep -oE "[A-Z]+-[0-9]+")
+
           if [ -z "$JIRA_KEY" ]; then
             echo "Error: Commit message must include a valid JIRA issue key." >&2
             exit 1
           fi
+
           echo "${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
+
           echo "${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
+
           echo "${JIRA_KEY}" >> $CLOUDBEES_OUTPUTS/jira_key
         uses: docker://alpine/git:latest
         name: Get Commit Info
@@ -95,8 +104,7 @@ jobs:
         uses: cloudbees-io/publish-evidence-item@v1
         name: Publish Results
   exit_gate:
-    needs:
-      - smokeTest_preprod
+    needs: smokeTest_preprod
     steps:
       - with:
           content: |-
@@ -104,3 +112,13 @@ jobs:
             ${{vars.PETCLINIC_DEV_EXIT_GATE}} 
         uses: cloudbees-io/publish-evidence-item@v1
         name: Publish Results
+  Prod_Approval:
+    needs:
+      - deploy-production
+    timeout-minutes: 4320
+    with:
+      instructions: ""
+      disallowLaunchByUser: false
+      approvers: 3b95fb7e-e80d-11ea-a794-42010a83ae1a,42bdb1e0-2a33-11f0-9bcf-42010a83ae57,ae58deb6-e80c-11ea-a794-42010a83ae1a,310969a0-e7fb-11ea-a794-42010a83ae1a,746da286-e80c-11ea-a794-42010a83ae1a,3bbc24ac-e80d-11ea-a794-42010a83ae1a,e4ec1c76-e80d-11ea-a794-42010a83ae1a,cc786812-e80c-11ea-a794-42010a83ae1a
+      notifyAllEligibleUsers: false
+    delegates: cloudbees-io/manual-approval/custom-job.yml@v1
