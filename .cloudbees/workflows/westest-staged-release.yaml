@@ -53,6 +53,7 @@ jobs:
           echo "${JIRA_KEY}" >> $CLOUDBEES_OUTPUTS/jira_key
         uses: docker://alpine/git:latest
         name: Get Commit Info
+        id: commitinfo
       - with:
           content: |-
             ## JIRA Information
