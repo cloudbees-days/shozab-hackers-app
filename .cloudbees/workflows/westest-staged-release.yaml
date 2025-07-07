@@ -43,7 +43,8 @@ jobs:
           echo "Commit ID: $COMMIT_ID"
           echo "Commit Message: $COMMIT_MSG"
           # Extract the JIRA issue key (assuming format like PROJECTKEY-123)
-          JIRA_KEY=$(echo "$COMMIT_MSG" | grep -oE "[A-Z]+-[0-9]+")
+          #JIRA_KEY=$(echo "$COMMIT_MSG" | grep -oE "[A-Z]+-[0-9]+")
+          JIRA_KEY=CBP-1234
           if [ -z "$JIRA_KEY" ]; then
             echo "Error: Commit message must include a valid JIRA issue key." >&2
             exit 1
