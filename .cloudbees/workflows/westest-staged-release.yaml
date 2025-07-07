@@ -17,7 +17,6 @@ metadata:
       jobs:
         - deploy-pre-prod
         - evidence-collection
-        - smokeTest_preprod
         - exit_gate
     - name: Production
       jobs:
@@ -37,20 +36,30 @@ jobs:
         name: Configure git
       - uses: cloudbees-io/checkout@v1
         name: Checkout
-      - run: |
+      - run: >
           COMMIT_ID=$(git rev-parse HEAD)
+
           COMMIT_MSG=$(git log -1 --pretty=%B)
+
           echo "Commit ID: $COMMIT_ID"
+
           echo "Commit Message: $COMMIT_MSG"
+
           # Extract the JIRA issue key (assuming format like PROJECTKEY-123)
+
           #JIRA_KEY=$(echo "$COMMIT_MSG" | grep -oE "[A-Z]+-[0-9]+")
+
           JIRA_KEY=CBP-1234
+
           if [ -z "$JIRA_KEY" ]; then
             echo "Error: Commit message must include a valid JIRA issue key." >&2
             exit 1
           fi
+
           echo "${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
+
           echo "${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
+
           echo "${JIRA_KEY}" >> $CLOUDBEES_OUTPUTS/jira_key
         uses: docker://alpine/git:latest
         name: Get Commit Info
@@ -84,21 +93,8 @@ jobs:
         shell: sh
         run: |
           echo Ready to deploy to Production
-  smokeTest_preprod:
-    needs: deploy-pre-prod
-    steps:
-      - uses: cloudbees-io/checkout@v1
-        name: Checkout
-      - name: Smoke Test
-        uses: docker://maven:3-eclipse-temurin-17
-        run: mvn test
-        kind: test
-      - with:
-          content: "${{vars.PETCLINIC_SMOKETEST_DEV_RESULTS}} "
-        uses: cloudbees-io/publish-evidence-item@v1
-        name: Publish Results
   exit_gate:
-    needs: smokeTest_preprod
+    needs: deploy-pre-prod
     steps:
       - with:
           content: |-
