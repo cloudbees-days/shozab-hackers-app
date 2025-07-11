@@ -1,0 +1,19 @@
+
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: Test new environment targets
+on:
+  workflow_dispatch:
+    inputs:
+      manifest:
+        type: string
+        required: true
+        default: '{"hackers-web":{"deploy":true,"id":"8c6e1bb3-987c-4ad9-9a21-5bd67449a364","ldonleycb/hackers-web":{"deploy":true,"digest":"sha256:d17203215f819ae8c73fd93b05ee9189f10fcb822f4cb9e3454a5bf61a0a5475","id":"6bccc31b-1ab0-4f22-acb2-8eaf261ce26b","name":"ldonleycb/hackers-web","url":"ldonleycb/hackers-web:1.0-0.0.69","version":"1.0-0.0.69"}}}'
+jobs:
+  deploy:
+    uses: cloudbees-days/hackers-app/.cloudbees/workflows/deployer.yaml
+    with:
+      manifest: ${{ inputs.manifest }}
+      environment: hacker-pre
+    secrets: inherit
+    vars: inherit
