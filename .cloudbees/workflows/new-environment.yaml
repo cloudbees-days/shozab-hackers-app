@@ -8,7 +8,7 @@ on:
       manifest:
         type: string
         required: true
-        default: '{"hackers-web":{"deploy":true,"id":"8c6e1bb3-987c-4ad9-9a21-5bd67449a364","ldonleycb/hackers-web":{"deploy":true,"digest":"sha256:d17203215f819ae8c73fd93b05ee9189f10fcb822f4cb9e3454a5bf61a0a5475","id":"6bccc31b-1ab0-4f22-acb2-8eaf261ce26b","name":"ldonleycb/hackers-web","url":"ldonleycb/hackers-web:1.0-0.0.69","version":"1.0-0.0.69"}}}'
+        default: '{"hackers-api":{"deploy":false,"id":"cecf6207-a5a5-4e8e-a31c-55dffe29753b","ldonleycb/hackers-api":{"deploy":false,"digest":"sha256:6eef7cf248c035a8001e644efbf0221bb6ac6cc0e18fe94630ee202c8addad0c","id":"52b5632b-cd2d-4b00-a469-68b4839c5b57","name":"ldonleycb/hackers-api","url":"ldonleycb/hackers-api:3.0-0.0.58","version":"3.0-0.0.58"}},"hackers-auth":{"deploy":false,"id":"46e4e525-6d6e-4cb9-a66b-69bbcd38cc1d","ldonleycb/hackers-auth":{"deploy":false,"digest":"sha256:1791876d44838a58fa781c6661a87039fcbada87664c25194854e9d3983fdc79","id":"828978eb-5e4e-4423-8ea0-13021b7cda45","name":"ldonleycb/hackers-auth","url":"ldonleycb/hackers-auth:2.0-0.0.53","version":"2.0-0.0.53"}},"hackers-web":{"deploy":true,"id":"8c6e1bb3-987c-4ad9-9a21-5bd67449a364","ldonleycb/hackers-web":{"deploy":true,"digest":"sha256:d17203215f819ae8c73fd93b05ee9189f10fcb822f4cb9e3454a5bf61a0a5475","id":"6bccc31b-1ab0-4f22-acb2-8eaf261ce26b","name":"ldonleycb/hackers-web","url":"ldonleycb/hackers-web:1.0-0.0.69","version":"1.0-0.0.69"}}}'
 jobs:
   deploy:
     uses: cloudbees-days/hackers-app/.cloudbees/workflows/deployer.yaml
