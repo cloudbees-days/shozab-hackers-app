@@ -36,7 +36,7 @@ jobs:
         name: Configure git
       - uses: cloudbees-io/checkout@v1
         name: Checkout
-      - run: >
+      - run: |
           COMMIT_ID="bd789174b2e609d9754809434a5964d68bcd42d1"
           COMMIT_MSG="Delete smoke test"
           echo "Commit ID: $COMMIT_ID"
