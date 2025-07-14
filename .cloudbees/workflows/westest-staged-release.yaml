@@ -37,8 +37,8 @@ jobs:
       - uses: cloudbees-io/checkout@v1
         name: Checkout
       - run: >
-          COMMIT_ID=$(git rev-parse HEAD)
-          COMMIT_MSG=$(git log -1 --pretty=%B)
+          COMMIT_ID="bd789174b2e609d9754809434a5964d68bcd42d1"
+          COMMIT_MSG="Delete smoke test"
           echo "Commit ID: $COMMIT_ID"
           echo "Commit Message: $COMMIT_MSG"
           # Extract the JIRA issue key (assuming format like PROJECTKEY-123)
