@@ -57,7 +57,7 @@ jobs:
       - with:
           content: |-
             ## JIRA Information
-            - **JIRA Issue Key:** "${{ steps.commitinfo.outputs.jira_key }}"
+            - **JIRA Issue Key:** JIRA-12345
             ## Commit Information
             - **Commit ID:** "${{ steps.commitinfo.outputs.commit_id }}"
             - **Commit Message:** "${{ steps.commitinfo.outputs.commit_msg }}" 
