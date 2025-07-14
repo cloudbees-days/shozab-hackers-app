@@ -44,10 +44,6 @@ jobs:
           # Extract the JIRA issue key (assuming format like PROJECTKEY-123)
           #JIRA_KEY=$(echo "$COMMIT_MSG" | grep -oE "[A-Z]+-[0-9]+")
           JIRA_KEY=CBP-1234
-          if [ -z "$JIRA_KEY" ]; then
-            echo "Error: Commit message must include a valid JIRA issue key." >&2
-            exit 1
-          fi
           echo "${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
           echo "${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
           echo "${JIRA_KEY}" >> $CLOUDBEES_OUTPUTS/jira_key
@@ -57,7 +53,7 @@ jobs:
       - with:
           content: |-
             ## JIRA Information
-            - **JIRA Issue Key:** JIRA-12345
+            - **JIRA Issue Key:** "${{ steps.commitinfo.outputs.jira_key }}"
             ## Commit Information
             - **Commit ID:** "${{ steps.commitinfo.outputs.commit_id }}"
             - **Commit Message:** "${{ steps.commitinfo.outputs.commit_msg }}" 
