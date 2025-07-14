@@ -70,6 +70,7 @@ jobs:
       manifest: ${{ inputs.manifest }}
       environment: hacker-pre
     secrets: inherit
+    vars: inherit
   SN-approval:
     needs: exit_gate
     uses: cloudbees-days/hackers-app/.cloudbees/workflows/sn-approval.yaml
