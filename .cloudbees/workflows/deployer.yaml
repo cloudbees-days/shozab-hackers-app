@@ -21,6 +21,7 @@ jobs:
       digest: ${{ fromJSON(inputs.manifest)['hackers-api']['ldonleycb/hackers-api'].digest }}
       environment: ${{ inputs.environment }}
     secrets: inherit
+    vars: inherit
   hackers-auth:
     if: ${{ fromJSON(inputs.manifest)['hackers-auth']['ldonleycb/hackers-auth'].deploy }}
     uses: cloudbees-days/hackers-auth/.cloudbees/workflows/deploy.yaml
@@ -30,6 +31,7 @@ jobs:
       digest: ${{ fromJSON(inputs.manifest)['hackers-auth']['ldonleycb/hackers-auth'].digest }}
       environment: ${{ inputs.environment }}
     secrets: inherit
+    vars: inherit
   hackers-web:
     if: ${{ fromJSON(inputs.manifest)['hackers-web']['ldonleycb/hackers-web'].deploy }}
     uses: cloudbees-days/hackers-web/.cloudbees/workflows/deploy.yaml
@@ -39,3 +41,4 @@ jobs:
       digest: ${{ fromJSON(inputs.manifest)['hackers-web']['ldonleycb/hackers-web'].digest }}
       environment: ${{ inputs.environment }}
     secrets: inherit
+    vars: inherit
