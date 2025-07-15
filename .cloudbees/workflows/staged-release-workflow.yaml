@@ -27,6 +27,7 @@ jobs:
       manifest: ${{ inputs.manifest }}
       environment: hacker-pre
     secrets: inherit
+    vars: inherit
   SN-approval:
     needs:
       - deploy-pre-prod
