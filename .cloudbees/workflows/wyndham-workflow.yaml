@@ -868,6 +868,8 @@ jobs:
       approvers: ""
       notifyAllEligibleUsers: false
   Business_Approval_Prod:
+    needs:
+      - Exit_Preview_Approval
     timeout-minutes: 4320
     delegates: cloudbees-io/manual-approval/custom-job.yml@v1
     with:
