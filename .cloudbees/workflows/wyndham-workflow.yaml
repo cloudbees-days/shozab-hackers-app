@@ -44,18 +44,15 @@ metadata:
         - Parse_Release_Prod
         - Functional_Test_Prod
         - RMO_Approval_Prod
+        - Roll_Back_Needed
 jobs:
   deploy-to-QA:
+    needs: QA_Job_Jenkins
     steps:
-      - name: Deploy to QA
+      - run: echo "Deploying to QA"
         uses: docker://golang:1.20.3-alpine3.17
+        name: Deploy to QA
         shell: sh
-        run: echo "Deploying to QA"
-    needs:
-      - Get_Incident_SysId
-      - Exit_Preview_Approval
-      - CheckMarx_Scan
-      - Peformance_Test
   QA_Approval:
     timeout-minutes: 4320
     delegates: cloudbees-io/manual-approval/custom-job.yml@v1
@@ -64,7 +61,6 @@ jobs:
       disallowLaunchByUser: false
       approvers: ""
       notifyAllEligibleUsers: false
-    needs: RMO_Approval
   AWS_Admin_Approval:
     timeout-minutes: 4320
     delegates: cloudbees-io/manual-approval/custom-job.yml@v1
@@ -192,7 +188,6 @@ jobs:
         name: Functioanal Test
     needs: deploy-to-QA
   Peformance_Test:
-    needs: QA_Approval
     steps:
       - with:
           content: >-
@@ -289,8 +284,8 @@ jobs:
             Through
         uses: cloudbees-io/publish-evidence-item@v1
         name: Performance Test
+    needs: Functional_Test
   CheckMarx_Scan:
-    needs: Peformance_Test
     steps:
       - with:
           content: >-
@@ -469,6 +464,7 @@ jobs:
             ---
         uses: cloudbees-io/publish-evidence-item@v1
         name: CheckMarx Results
+    needs: Peformance_Test
   Code_Review_Doc:
     timeout-minutes: 4320
     delegates: cloudbees-io/manual-approval/custom-job.yml@v1
@@ -477,7 +473,7 @@ jobs:
       disallowLaunchByUser: false
       approvers: ""
       notifyAllEligibleUsers: false
-    needs: Functional_Test
+    needs: CheckMarx_Scan
   QA_Exit_Approval:
     timeout-minutes: 4320
     delegates: cloudbees-io/manual-approval/custom-job.yml@v1
@@ -524,7 +520,9 @@ jobs:
       disallowLaunchByUser: false
       approvers: ""
       notifyAllEligibleUsers: false
+    needs: QA_Exit_Approval
   RFC_From_Assyst:
+    needs: RMO_Approval
     steps:
       - with:
           content: >-
@@ -574,9 +572,6 @@ jobs:
               - Risk of disruption if rollback is required.  
         uses: cloudbees-io/publish-evidence-item@v1
         name: Change Request from Assyst
-    needs:
-      - RMO_Approval
-      - Get_Incident_SysId
   Preview_Job_Jenkins:
     needs: RFC_From_Assyst
     steps:
@@ -740,15 +735,12 @@ jobs:
         uses: cloudbees-io/publish-evidence-item@v1
         name: Release Notes
   deploy-to-Preview:
+    needs: Parse_Release_Preview
     steps:
-      - name: Deploy to Preview
+      - run: echo "Deploying to Preview"
         uses: docker://golang:1.20.3-alpine3.17
+        name: Deploy to Preview
         shell: sh
-        run: echo "Deploying to Preview"
-    needs:
-      - Parse_Release_Preview
-      - QA_Job_Jenkins
-      - RFC_From_Assyst_Prod
   Functional_Test_Preview:
     needs: deploy-to-Preview
     steps:
@@ -884,6 +876,7 @@ jobs:
       approvers: ""
       notifyAllEligibleUsers: false
   RFC_From_Assyst_Prod:
+    needs: RMO_Approval_Prod
     steps:
       - with:
           content: >-
@@ -933,14 +926,8 @@ jobs:
               - Risk of disruption if rollback is required.  
         uses: cloudbees-io/publish-evidence-item@v1
         name: Change Request from Assyst
-    needs:
-      - RMO_Approval
-      - Get_Incident_SysId
-      - RMO_Approval_Prod
   Prod_Job_Jenkins:
-    needs:
-      - RFC_From_Assyst
-      - RFC_From_Assyst_Prod
+    needs: RFC_From_Assyst_Prod
     steps:
       - with:
           content: >-
@@ -1102,19 +1089,13 @@ jobs:
         uses: cloudbees-io/publish-evidence-item@v1
         name: Release Notes
   deploy-to-Prod:
+    needs: Parse_Release_Prod
     steps:
-      - name: Deploy to Prod
+      - run: echo "Deploying to Preview"
         uses: docker://golang:1.20.3-alpine3.17
+        name: Deploy to Prod
         shell: sh
-        run: echo "Deploying to Preview"
-    needs:
-      - Parse_Release_Prod
-      - QA_Job_Jenkins
   Functional_Test_Prod:
-    needs:
-      - deploy-to-Prod
-      - CheckMarx_Scan
-      - RMO_Approval_Prod
     steps:
       - with:
           content: >-
@@ -1221,9 +1202,11 @@ jobs:
             - [ ] Blocked  
         uses: cloudbees-io/publish-evidence-item@v1
         name: Functioanal Test
+    needs: deploy-to-Prod
   RMO_Approval_Prod:
     needs:
       - Business_Approva_Prod
+      - Business_Approval_Prod
     timeout-minutes: 4320
     delegates: cloudbees-io/manual-approval/custom-job.yml@v1
     with:
@@ -1239,3 +1222,13 @@ jobs:
       disallowLaunchByUser: false
       approvers: ""
       notifyAllEligibleUsers: false
+    needs: Exit_Preview_Approval
+  Roll_Back_Needed:
+    timeout-minutes: 4320
+    delegates: cloudbees-io/manual-approval/custom-job.yml@v1
+    with:
+      instructions: ""
+      disallowLaunchByUser: false
+      approvers: ""
+      notifyAllEligibleUsers: false
+    needs: Functional_Test_Prod
