@@ -800,14 +800,14 @@ Parse_Release_Preview:
         uses: cloudbees-io/publish-evidence-item@v1
         name: Release Notes
 
-  deploy-to-Preview:
-    steps:
-      - name: Deploy to Preview
-        uses: docker://golang:1.20.3-alpine3.17
-        shell: sh
-        run: echo "Deploying to Preview"
-    needs:
-      - Parse_Release_Preview
+deploy-to-Preview:
+  steps:
+    - name: Deploy to Preview
+      uses: docker://golang:1.20.3-alpine3.17
+      shell: sh
+      run: echo "Deploying to Preview"
+  needs:
+    - Parse_Release_Preview
 
   Functional_Test_Preview:
     needs: deploy-to-Preview
