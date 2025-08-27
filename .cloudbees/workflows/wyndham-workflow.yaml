@@ -45,8 +45,6 @@ jobs:
         shell: sh
         run: echo "Deploying to Prod"
     needs: Get_Incident_SysId
-
-
   QA_Approval:
     timeout-minutes: 4320
     delegates: cloudbees-io/manual-approval/custom-job.yml@v1
@@ -564,13 +562,6 @@ jobs:
       disallowLaunchByUser: false
       approvers: ""
       notifyAllEligibleUsers: false
-  job:
-    needs: QA_Exit_Approval
-    steps:
-      - name: Say hello
-        uses: docker://golang:1.20.3-alpine3.17
-        shell: sh
-        run: echo "hello world"
   QA_Job_Jenkins:
     needs:
       - Get_Incident_SysId
@@ -601,7 +592,6 @@ jobs:
             **QA Test Gate**: PASSED - Ready for next stage
         uses: cloudbees-io/publish-evidence-item@v1
         name: QA Job
-
   Business_Approval:
     timeout-minutes: 4320
     delegates: cloudbees-io/manual-approval/custom-job.yml@v1
@@ -712,7 +702,7 @@ jobs:
 
         uses: cloudbees-io/publish-evidence-item@v1
         name: Preview Job
-Parse_Release_Preview:
+  Parse_Release_Preview:
     needs: Preview_Job_Jenkins
     steps:
       - with:
@@ -799,16 +789,14 @@ Parse_Release_Preview:
               npm install myapp@2.3.0
         uses: cloudbees-io/publish-evidence-item@v1
         name: Release Notes
-
-deploy-to-Preview:
-  steps:
-    - name: Deploy to Preview
-      uses: docker://golang:1.20.3-alpine3.17
-      shell: sh
-      run: echo "Deploying to Preview"
-  needs:
-    - Parse_Release_Preview
-
+  deploy-to-Preview:
+    steps:
+      - name: Deploy to Preview
+        uses: docker://golang:1.20.3-alpine3.17
+        shell: sh
+        run: echo "Deploying to Preview"
+    needs:
+      - Parse_Release_Preview
   Functional_Test_Preview:
     needs: deploy-to-Preview
     steps:
