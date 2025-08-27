@@ -11,6 +11,13 @@ metadata:
         - QA_Approval
         - AWS_Admin_Approval
         - Get_Incident_SysId
+        - QA_Job
+        - Parse_Release
+        - Functional_Test
+        - Peformance_Test
+        - CheckMarx_Scan
+        - Code_Review_Doc
+        - QA_Exit_Approval
 jobs:
   deploy-to-Prod:
     steps:
