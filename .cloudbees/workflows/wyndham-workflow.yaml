@@ -33,7 +33,9 @@ jobs:
         uses: docker://golang:1.20.3-alpine3.17
         shell: sh
         run: echo "Deploying to Prod"
-    needs: Get_Incident_SysId
+    needs:
+      - Get_Incident_SysId
+      - Parse_Release
   QA_Approval:
     timeout-minutes: 4320
     delegates: cloudbees-io/manual-approval/custom-job.yml@v1
@@ -89,151 +91,242 @@ jobs:
             - **Resource Usage**: CPU 45%, Memory 55%
 
             **QA Test Gate**: PASSED - Ready for staging
-
         uses: cloudbees-io/publish-evidence-item@v1
         name: QA Job
-
   Parse_Release:
     needs: QA_Job
     steps:
       - with:
-          content: |-
+          content: >-
             # Release Notes - Version 2.3.0
+
             **Release Date:** 2025-08-27
 
+
             ---
+
 
             ## 🚀 New Features
-            - **Dark Mode UI:** Added full support for dark mode across all platforms.
-            - **Advanced Search Filters:** Users can now filter search results by tags, date ranges, and categories.
-            - **API Rate Limiting Dashboard:** Introduced a new dashboard for monitoring and managing API usage limits.
+
+            - **Dark Mode UI:** Added full support for dark mode across all
+            platforms.
+
+            - **Advanced Search Filters:** Users can now filter search results
+            by tags, date ranges, and categories.
+
+            - **API Rate Limiting Dashboard:** Introduced a new dashboard for
+            monitoring and managing API usage limits.
+
 
             ---
+
 
             ## 🛠 Improvements
-            - Enhanced performance of the data synchronization service (30% faster).
+
+            - Enhanced performance of the data synchronization service (30%
+            faster).
+
             - Optimized memory usage in background tasks.
+
             - Improved accessibility support for screen readers.
 
+
             ---
+
 
             ## 🐛 Bug Fixes
-            - Fixed issue where notifications failed to appear on iOS 17 devices.
+
+            - Fixed issue where notifications failed to appear on iOS 17
+            devices.
+
             - Resolved intermittent login failures when using SSO.
-            - Corrected alignment issues in the settings page on smaller screens.
+
+            - Corrected alignment issues in the settings page on smaller
+            screens.
+
 
             ---
+
 
             ## ⚠️ Deprecations
-            - Deprecated support for API v1.0 (scheduled for removal in next major release).
+
+            - Deprecated support for API v1.0 (scheduled for removal in next
+            major release).
+
             - Removed legacy export formats (XML and CSV 1.0).
 
+
             ---
+
 
             ## 📘 Known Issues
-            - Some users may still experience delays with push notifications in Android 15 beta.
-            - The analytics dashboard may occasionally show delayed data for large accounts.
+
+            - Some users may still experience delays with push notifications in
+            Android 15 beta.
+
+            - The analytics dashboard may occasionally show delayed data for
+            large accounts.
+
 
             ---
 
+
             ## 🔧 Upgrade Instructions
+
             1. Backup your current configuration.
+
             2. Run the update command:
               ```bash
               npm install myapp@2.3.0
-        uses: cloudbees-io/publish-evidence-item@v1     
+        uses: cloudbees-io/publish-evidence-item@v1
         name: Release Notes
-
   Functional_Test:
-    needs: Parse_Release
+    needs: deploy-to-Prod
     steps:
       - with:
-          content: |-
+          content: >-
             # Functional Test: User Login Feature
 
+
             **Test ID:** FT-LOGIN-001  
+
             **Module:** Authentication  
+
             **Tested By:** QA Team  
+
             **Date:** 2025-08-27  
+
             **Preconditions:**  
+
             - User has a valid account created.  
+
             - Application is accessible at https://app.example.com  
 
+
             ---
+
 
             ## 🎯 Test Objective
-            To verify that a registered user can successfully log in with valid credentials and is redirected to the dashboard.
+
+            To verify that a registered user can successfully log in with valid
+            credentials and is redirected to the dashboard.
+
 
             ---
+
 
             ## 📝 Test Steps
+
             1. Navigate to the login page: `https://app.example.com/login`.
+
             2. Enter a valid username (e.g., `testuser@example.com`).
+
             3. Enter a valid password (e.g., `Password123!`).
+
             4. Click the **Login** button.
 
+
             ---
+
 
             ## ✅ Expected Result
+
             - User is authenticated successfully.  
+
             - The system redirects to the **Dashboard page**.  
+
             - A welcome message (e.g., *“Welcome, Test User”*) is displayed.
 
+
             ---
+
 
             ## 🔍 Actual Result
+
             - [To be filled during execution]
 
+
             ---
+
 
             ## 📊 Test Data
+
             | Username              | Password       | Expected Result   |
+
             |-----------------------|---------------|------------------|
-            | testuser@example.com  | Password123!  | Success - Dashboard loads |
-            | invaliduser@example.com | Password123! | Failure - Error message displayed |
-            | testuser@example.com  | wrongpass!    | Failure - Error message displayed |
+
+            | testuser@example.com  | Password123!  | Success - Dashboard loads
+            |
+
+            | invaliduser@example.com | Password123! | Failure - Error message
+            displayed |
+
+            | testuser@example.com  | wrongpass!    | Failure - Error message
+            displayed |
+
 
             ---
+
 
             ## 📘 Notes
+
             - Error message should be: *“Invalid username or password”*.  
-            - Login attempts are limited to **5 per minute** to prevent brute force.  
+
+            - Login attempts are limited to **5 per minute** to prevent brute
+            force.  
+
 
             ---
 
+
             ## 🏁 Status
+
             - [ ] Pass  
+
             - [ ] Fail  
+
             - [ ] Blocked  
-
-
         uses: cloudbees-io/publish-evidence-item@v1
         name: Functioanal Test
-
   Peformance_Test:
     needs: Functional_Test
     steps:
       - with:
-          content: |-
+          content: >-
             # Performance Test: User Login API
 
+
             **Test ID:** PT-LOGIN-001  
+
             **Module:** Authentication Service  
+
             **Tested By:** QA Performance Team  
+
             **Date:** 2025-08-27  
+
             **Preconditions:**  
+
             - Test environment configured with production-like infrastructure.  
+
             - Load testing tool (e.g., JMeter, k6, Gatling) is available.  
+
             - Database seeded with 100,000 user records.  
 
+
             ---
+
 
             ## 🎯 Test Objective
-            To validate the performance and scalability of the **User Login API** under normal and peak load conditions.
+
+            To validate the performance and scalability of the **User Login
+            API** under normal and peak load conditions.
+
 
             ---
 
+
             ## 📝 Test Scenarios
+
             1. **Baseline Test**  
               - 50 virtual users log in concurrently.  
               - Measure response time and throughput.  
@@ -252,131 +345,230 @@ jobs:
 
             ---
 
+
             ## 📊 Metrics to Capture
+
             - Average Response Time (ms)  
+
             - 90th/95th/99th Percentile Latency (ms)  
+
             - Error Rate (%)  
+
             - Throughput (Requests per Second)  
+
             - CPU & Memory Utilization (%)  
+
             - Database Query Response Times  
 
+
             ---
+
 
             ## ✅ Expected Results
+
             - **Baseline:** Average response time < 300 ms.  
-            - **Load Test:** 95th percentile latency < 500 ms with < 1% error rate.  
-            - **Stress Test:** System should degrade gracefully without crashing.  
+
+            - **Load Test:** 95th percentile latency < 500 ms with < 1% error
+            rate.  
+
+            - **Stress Test:** System should degrade gracefully without
+            crashing.  
+
             - **Spike Test:** Recovery within 30 seconds of load drop.  
 
+
             ---
+
 
             ## 🔍 Actual Results
-            | Scenario      | Avg Response (ms) | 95th % (ms) | Error Rate (%) | Through
-        uses: cloudbees-io/publish-evidence-item@v1
-        name: Performance Test        
 
+            | Scenario      | Avg Response (ms) | 95th % (ms) | Error Rate (%) |
+            Through
+        uses: cloudbees-io/publish-evidence-item@v1
+        name: Performance Test
   CheckMarx_Scan:
-    needs: Performance_Test
+    needs:
+      - Performance_Test
+      - Peformance_Test
     steps:
       - with:
-          content: |-
+          content: >-
             # Checkmarx Scan Results
 
+
             **Project:** Online Banking App  
+
             **Scan Type:** SAST + SCA  
+
             **Scan Date:** 2025-08-27  
+
             **Scan ID:** 874321  
+
             **Status:** Completed ✅  
 
+
             ---
+
 
             ## 🔍 Summary
 
+
             | Category              | Count |
+
             |-----------------------|-------|
+
             | Critical Vulnerabilities | 3 |
+
             | High Vulnerabilities     | 5 |
+
             | Medium Vulnerabilities   | 7 |
+
             | Low Vulnerabilities      | 10 |
+
             | Information              | 4 |
 
+
             ---
+
 
             ## 🚨 Critical Issues
 
+
             ### 1. SQL Injection
+
             - **File:** `src/main/java/com/bank/UserDAO.java`  
+
             - **Line:** 58  
-            - **Query:** `SELECT * FROM users WHERE username = ' " + userInput + "'`  
+
+            - **Query:** `SELECT * FROM users WHERE username = ' " + userInput +
+            "'`  
+
             - **Severity:** Critical  
-            - **Recommendation:** Use prepared statements with parameterized queries.  
+
+            - **Recommendation:** Use prepared statements with parameterized
+            queries.  
+
 
             ---
+
 
             ### 2. Hardcoded Credentials
+
             - **File:** `src/main/resources/config.properties`  
+
             - **Line:** 12  
+
             - **Finding:** Database password stored in plaintext.  
+
             - **Severity:** Critical  
-            - **Recommendation:** Remove hardcoded credentials, store secrets in a secure vault.  
+
+            - **Recommendation:** Remove hardcoded credentials, store secrets in
+            a secure vault.  
+
 
             ---
+
 
             ### 3. Command Injection
+
             - **File:** `src/main/java/com/bank/ExportService.java`  
+
             - **Line:** 101  
+
             - **Code:** `Runtime.getRuntime().exec("sh " + userInput);`  
+
             - **Severity:** Critical  
-            - **Recommendation:** Validate and sanitize user inputs, use safe APIs for command execution.  
+
+            - **Recommendation:** Validate and sanitize user inputs, use safe
+            APIs for command execution.  
+
 
             ---
+
 
             ## ⚠️ High Issues
 
+
             | ID | Vulnerability       | File | Line | Recommendation |
+
             |----|--------------------|------|------|----------------|
-            | H1 | Cross-Site Scripting (XSS) | `LoginController.java` | 72 | Encode user output, use validation filters |
-            | H2 | Insecure Random Number Generation | `TokenGenerator.java` | 33 | Use `SecureRandom` instead of `Random` |
-            | H3 | XML External Entity (XXE) | `XmlParser.java` | 45 | Disable external entity resolution |
-            | H4 | Insecure Cookie | `AuthFilter.java` | 28 | Add `HttpOnly` and `Secure` flags |
-            | H5 | Missing Input Validation | `PaymentController.java` | 90 | Implement strict validation for inputs |
+
+            | H1 | Cross-Site Scripting (XSS) | `LoginController.java` | 72 |
+            Encode user output, use validation filters |
+
+            | H2 | Insecure Random Number Generation | `TokenGenerator.java` |
+            33 | Use `SecureRandom` instead of `Random` |
+
+            | H3 | XML External Entity (XXE) | `XmlParser.java` | 45 | Disable
+            external entity resolution |
+
+            | H4 | Insecure Cookie | `AuthFilter.java` | 28 | Add `HttpOnly` and
+            `Secure` flags |
+
+            | H5 | Missing Input Validation | `PaymentController.java` | 90 |
+            Implement strict validation for inputs |
+
 
             ---
+
 
             ## 🟡 Medium Issues
 
+
             - **Open Redirect** → `RedirectController.java:54`  
+
             - **Weak Password Policy** → `UserService.java:112`  
-            - **Information Exposure in Error Message** → `ErrorHandler.java:23`  
+
+            - **Information Exposure in Error Message** →
+            `ErrorHandler.java:23`  
+
             - *(and 4 more…)*  
 
+
             ---
+
 
             ## 🔍 SCA (Open Source Dependencies)
 
+
             | Dependency | Version | Issue | Severity | Recommendation |
+
             |------------|---------|-------|----------|----------------|
-            | log4j      | 2.14.0  | CVE-2021-44228 (Log4Shell) | Critical | Upgrade to 2.17.1+ |
-            | spring-core| 5.2.3   | CVE-2022-22965 (Spring4Shell) | High | Upgrade to 5.3.18+ |
-            | jackson-databind | 2.9.10 | CVE-2019-12086 | Medium | Upgrade to 2.13.1+ |
+
+            | log4j      | 2.14.0  | CVE-2021-44228 (Log4Shell) | Critical |
+            Upgrade to 2.17.1+ |
+
+            | spring-core| 5.2.3   | CVE-2022-22965 (Spring4Shell) | High |
+            Upgrade to 5.3.18+ |
+
+            | jackson-databind | 2.9.10 | CVE-2019-12086 | Medium | Upgrade to
+            2.13.1+ |
+
 
             ---
+
 
             ## ✅ Recommendations & Next Steps
 
-            1. Prioritize fixing **Critical and High** vulnerabilities immediately.  
-            2. Implement **secure coding practices** (parameterized queries, input validation, escaping output).  
-            3. Rotate and store secrets in a secure vault (HashiCorp Vault, AWS Secrets Manager, etc.).  
+
+            1. Prioritize fixing **Critical and High** vulnerabilities
+            immediately.  
+
+            2. Implement **secure coding practices** (parameterized queries,
+            input validation, escaping output).  
+
+            3. Rotate and store secrets in a secure vault (HashiCorp Vault, AWS
+            Secrets Manager, etc.).  
+
             4. Upgrade vulnerable open-source dependencies to safe versions.  
+
             5. Re-run scan after fixes for verification.  
 
-            ---
 
+            ---
         uses: cloudbees-io/publish-evidence-item@v1
         name: CheckMarx Results
-
   Code_Review_Doc:
-    needs: CheckMarx_Scan
     timeout-minutes: 4320
     delegates: cloudbees-io/manual-approval/custom-job.yml@v1
     with:
@@ -384,8 +576,7 @@ jobs:
       disallowLaunchByUser: false
       approvers: ""
       notifyAllEligibleUsers: false
-
-
+    needs: CheckMarx_Scan
   QA_Exit_Approval:
     needs: Code_Review_Doc
     timeout-minutes: 4320
