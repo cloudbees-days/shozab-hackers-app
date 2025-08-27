@@ -15,7 +15,7 @@ metadata:
   stages/v1alpha1:
     - name: QA
       jobs:
-        - deploy-to-Prod
+        - deploy-to-QA
         - QA_Approval
         - AWS_Admin_Approval
         - Get_Incident_SysId
@@ -45,12 +45,12 @@ metadata:
         - Functional_Test_Prod
         - RMO_Approval_Prod        
 jobs:
-  deploy-to-Prod:
+  deploy-to-QA:
     steps:
-      - name: Deploy to Prod
+      - name: Deploy to QA
         uses: docker://golang:1.20.3-alpine3.17
         shell: sh
-        run: echo "Deploying to Prod"
+        run: echo "Deploying to QA"
     needs:
       - Get_Incident_SysId
       - Exit_Preview_Approval
@@ -1010,7 +1010,7 @@ jobs:
             [https://preview-app.company.com/build-152](https:/)
         uses: cloudbees-io/publish-evidence-item@v1
         name: Preview Job
-  Parse_Release_Preview:
+  Parse_Release_Prod:
     needs: Prod_Job_Jenkins
     steps:
       - with:
