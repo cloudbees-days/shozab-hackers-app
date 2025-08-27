@@ -19,13 +19,16 @@ metadata:
         - QA_Approval
         - AWS_Admin_Approval
         - Get_Incident_SysId
-        - QA_Job
+        - QA_Job_Jenkins
         - Parse_Release
         - Functional_Test
         - Peformance_Test
         - CheckMarx_Scan
         - Code_Review_Doc
         - QA_Exit_Approval
+    - name: Preview
+      jobs:
+        - job
 jobs:
   deploy-to-Prod:
     steps:
@@ -62,37 +65,8 @@ jobs:
             SysId = 110927861
         uses: cloudbees-io/publish-evidence-item@v1
         name: Incident handler
-  QA_Job:
-    needs: Get_Incident_SysId
-    steps:
-      - with:
-          content: |-
-            # QA Test Results
-            ## Functional Tests
-            - **Total Tests**: 247
-            - **Passed**: 239
-            - **Failed**: 8
-            - **Success Rate**: 96.8%
-            - **Code Coverage**: 81%
-
-            ## Test Suite Breakdown
-            | Suite | Total | Passed | Failed |
-            |-------|-------|--------|--------|
-            | Web Service | 45 | 43 | 2 |
-            | Auth Service | 89 | 85 | 4 |
-            | API Service | 67 | 65 | 2 |
-            | Service Integration | 46 | 46 | 0 |
-
-            ## Performance Tests
-            - **Response Time**: Average 180ms
-            - **Throughput**: 950 requests/sec
-            - **Resource Usage**: CPU 45%, Memory 55%
-
-            **QA Test Gate**: PASSED - Ready for next stage
-        uses: cloudbees-io/publish-evidence-item@v1
-        name: QA Job
   Parse_Release:
-    needs: QA_Job
+    needs: QA_Job_Jenkins
     steps:
       - with:
           content: >-
@@ -385,8 +359,7 @@ jobs:
         uses: cloudbees-io/publish-evidence-item@v1
         name: Performance Test
   CheckMarx_Scan:
-    needs:
-      - Peformance_Test
+    needs: Peformance_Test
     steps:
       - with:
           content: >-
@@ -583,3 +556,40 @@ jobs:
       disallowLaunchByUser: false
       approvers: ""
       notifyAllEligibleUsers: false
+  job:
+    needs: QA_Exit_Approval
+    steps:
+      - name: Say hello
+        uses: docker://golang:1.20.3-alpine3.17
+        shell: sh
+        run: echo "hello world"
+  QA_Job_Jenkins:
+    needs:
+      - Get_Incident_SysId
+    steps:
+      - with:
+          content: |-
+            # QA Test Results
+            ## Functional Tests
+            - **Total Tests**: 247
+            - **Passed**: 239
+            - **Failed**: 8
+            - **Success Rate**: 96.8%
+            - **Code Coverage**: 81%
+
+            ## Test Suite Breakdown
+            | Suite | Total | Passed | Failed |
+            |-------|-------|--------|--------|
+            | Web Service | 45 | 43 | 2 |
+            | Auth Service | 89 | 85 | 4 |
+            | API Service | 67 | 65 | 2 |
+            | Service Integration | 46 | 46 | 0 |
+
+            ## Performance Tests
+            - **Response Time**: Average 180ms
+            - **Throughput**: 950 requests/sec
+            - **Resource Usage**: CPU 45%, Memory 55%
+
+            **QA Test Gate**: PASSED - Ready for next stage
+        uses: cloudbees-io/publish-evidence-item@v1
+        name: QA Job
