@@ -1205,7 +1205,6 @@ jobs:
     needs: deploy-to-Prod
   RMO_Approval_Prod:
     needs:
-      - Business_Approva_Prod
       - Business_Approval_Prod
     timeout-minutes: 4320
     delegates: cloudbees-io/manual-approval/custom-job.yml@v1
