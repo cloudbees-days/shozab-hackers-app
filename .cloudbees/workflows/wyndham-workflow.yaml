@@ -37,11 +37,13 @@ jobs:
       approvers: ""
       notifyAllEligibleUsers: false
   Get_Incident_SysId:
+    needs: AWS_Admin_Approval
     outputs:
-      SysId: "11092786"
+      SysId: "110927861"
     steps:
       - with:
-          content: "# Get SysId"
+          content: |-
+            # Get SysId
+            SysId = 110927861
         uses: cloudbees-io/publish-evidence-item@v1
         name: Incident handler
-    needs: AWS_Admin_Approval
