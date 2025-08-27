@@ -20,7 +20,6 @@ metadata:
         - AWS_Admin_Approval
         - Get_Incident_SysId
         - QA_Job_Jenkins
-        - Parse_Release
         - Functional_Test
         - Peformance_Test
         - CheckMarx_Scan
@@ -29,14 +28,13 @@ metadata:
     - name: Preview
       jobs:
         - Business_Approval
-        - RMO_Approval
         - RFC_From_Assyst
-        - Parse_Release
-        - deploy-to-Preview 
+        - deploy-to-Preview
         - Preview_Job_Jenkins
         - Parse_Release_Preview
         - Functional_Test_Preview
-        - Exit_QA_Approval
+        - Exit_Preview_Approval
+        - RMO_Approval
 jobs:
   deploy-to-Prod:
     steps:
@@ -44,7 +42,9 @@ jobs:
         uses: docker://golang:1.20.3-alpine3.17
         shell: sh
         run: echo "Deploying to Prod"
-    needs: Get_Incident_SysId
+    needs:
+      - Get_Incident_SysId
+      - Exit_Preview_Approval
   QA_Approval:
     timeout-minutes: 4320
     delegates: cloudbees-io/manual-approval/custom-job.yml@v1
@@ -53,6 +53,7 @@ jobs:
       disallowLaunchByUser: false
       approvers: ""
       notifyAllEligibleUsers: false
+    needs: RMO_Approval
   AWS_Admin_Approval:
     needs: QA_Approval
     timeout-minutes: 4320
@@ -71,93 +72,6 @@ jobs:
             SysId = 110927861
         uses: cloudbees-io/publish-evidence-item@v1
         name: Incident handler
-  Parse_Release:
-    needs: QA_Job_Jenkins
-    steps:
-      - with:
-          content: >-
-            # Release Notes - Version 2.3.0
-
-            **Release Date:** 2025-08-27
-
-
-            ---
-
-
-            ## 🚀 New Features
-
-            - **Dark Mode UI:** Added full support for dark mode across all
-            platforms.
-
-            - **Advanced Search Filters:** Users can now filter search results
-            by tags, date ranges, and categories.
-
-            - **API Rate Limiting Dashboard:** Introduced a new dashboard for
-            monitoring and managing API usage limits.
-
-
-            ---
-
-
-            ## 🛠 Improvements
-
-            - Enhanced performance of the data synchronization service (30%
-            faster).
-
-            - Optimized memory usage in background tasks.
-
-            - Improved accessibility support for screen readers.
-
-
-            ---
-
-
-            ## 🐛 Bug Fixes
-
-            - Fixed issue where notifications failed to appear on iOS 17
-            devices.
-
-            - Resolved intermittent login failures when using SSO.
-
-            - Corrected alignment issues in the settings page on smaller
-            screens.
-
-
-            ---
-
-
-            ## ⚠️ Deprecations
-
-            - Deprecated support for API v1.0 (scheduled for removal in next
-            major release).
-
-            - Removed legacy export formats (XML and CSV 1.0).
-
-
-            ---
-
-
-            ## 📘 Known Issues
-
-            - Some users may still experience delays with push notifications in
-            Android 15 beta.
-
-            - The analytics dashboard may occasionally show delayed data for
-            large accounts.
-
-
-            ---
-
-
-            ## 🔧 Upgrade Instructions
-
-            1. Backup your current configuration.
-
-            2. Run the update command:
-              ```bash
-              npm install myapp@2.3.0
-        uses: cloudbees-io/publish-evidence-item@v1
-        name: Release Notes
   Functional_Test:
     needs: deploy-to-Prod
     steps:
@@ -563,8 +477,7 @@ jobs:
       approvers: ""
       notifyAllEligibleUsers: false
   QA_Job_Jenkins:
-    needs:
-      - Get_Incident_SysId
+    needs: Get_Incident_SysId
     steps:
       - with:
           content: |-
@@ -600,33 +513,33 @@ jobs:
       disallowLaunchByUser: false
       approvers: ""
       notifyAllEligibleUsers: false
-  RMO_Approval:
-    needs: Business_Approval
-    timeout-minutes: 4320
-    delegates: cloudbees-io/manual-approval/custom-job.yml@v1
-    with:
-      instructions: AWS admin approval needed
-      disallowLaunchByUser: false
-      approvers: ""
-      notifyAllEligibleUsers: false
   RFC_From_Assyst:
-    needs: RMO_Approval
     steps:
       - with:
-          content: |-
+          content: >-
             # Request for Change (RFC)
 
+
             **RFC ID:** RFC-2025-0047  
+
             **Requested By:** John Doe (Service Desk)  
+
             **Date Raised:** 2025-08-27  
+
             **Change Type:** Standard Change  
+
             **Priority:** High  
+
             **Status:** Draft  
+
 
             ---
 
+
             ## 📘 Change Details
+
             - **Title:** Upgrade Database Server to PostgreSQL 15  
+
             - **Description:**  
               The current PostgreSQL 12 database server is reaching end-of-support.  
               This RFC proposes an upgrade to PostgreSQL 15 to ensure security compliance, vendor support, and performance improvements.
@@ -638,7 +551,9 @@ jobs:
 
             ---
 
+
             ## 🔍 Impact Analysis
+
             - **Services Affected:**  
               - Online Banking Application  
               - Reporting Dashboard  
@@ -646,39 +561,59 @@ jobs:
             - **Business Impact:**  
               - Potential downtime during upgrade window (~2 hours).  
               - Risk of disruption if rollback is required.  
-
         uses: cloudbees-io/publish-evidence-item@v1
         name: Change Request from Assyst
-  Preview_Job_Jenkins:
     needs:
+      - RMO_Approval
       - Get_Incident_SysId
+  Preview_Job_Jenkins:
+    needs: RFC_From_Assyst
     steps:
       - with:
-          content: |-
+          content: >-
             # Jenkins Pipeline Execution Report
 
+
             **Pipeline Name:** Preview_Pipeline  
+
             **Execution ID:** #152  
+
             **Status:** ✅ SUCCESS  
-            **Triggered By:** GitHub Push (branch: `feature/login-enhancement`)  
+
+            **Triggered By:** GitHub Push (branch:
+            `feature/login-enhancement`)  
+
             **Date/Time:** 2025-08-27 14:32 UTC  
+
             **Duration:** 6m 48s  
 
+
             ---
+
 
             ## 📘 Stages Overview
 
+
             | Stage Name       | Status  | Duration |
+
             |------------------|---------|----------|
+
             | Checkout Code    | ✅ Passed | 25s      |
+
             | Build            | ✅ Passed | 1m 12s   |
+
             | Unit Tests       | ✅ Passed | 2m 03s   |
+
             | Integration Tests| ✅ Passed | 2m 41s   |
+
             | Deploy Preview   | ✅ Passed | 27s      |
+
 
             ---
 
+
             ## 📊 Test Summary
+
 
             - **Unit Tests:**  
               - Total: 248  
@@ -694,12 +629,16 @@ jobs:
 
             ---
 
+
             ## 🔗 Artifacts
 
-            - **Build Artifact:** `preview-pipeline-build-152.zip`  
-            - **Docker Image:** `registry.company.com/preview_app:build-152`  
-            - **Preview URL:** [https://preview-app.company.com/build-152](https:/)
 
+            - **Build Artifact:** `preview-pipeline-build-152.zip`  
+
+            - **Docker Image:** `registry.company.com/preview_app:build-152`  
+
+            - **Preview URL:**
+            [https://preview-app.company.com/build-152](https:/)
         uses: cloudbees-io/publish-evidence-item@v1
         name: Preview Job
   Parse_Release_Preview:
@@ -797,6 +736,7 @@ jobs:
         run: echo "Deploying to Preview"
     needs:
       - Parse_Release_Preview
+      - QA_Job_Jenkins
   Functional_Test_Preview:
     needs: deploy-to-Preview
     steps:
@@ -905,11 +845,22 @@ jobs:
             - [ ] Blocked  
         uses: cloudbees-io/publish-evidence-item@v1
         name: Functioanal Test
-  Exit_QA_Approval:
+  Exit_Preview_Approval:
     timeout-minutes: 4320
     delegates: cloudbees-io/manual-approval/custom-job.yml@v1
     with:
       instructions: Approve artifacts to go to QA stage
+      disallowLaunchByUser: false
+      approvers: ""
+      notifyAllEligibleUsers: false
+    needs: Functional_Test_Preview
+  RMO_Approval:
+    needs:
+      - Business_Approval
+    timeout-minutes: 4320
+    delegates: cloudbees-io/manual-approval/custom-job.yml@v1
+    with:
+      instructions: ""
       disallowLaunchByUser: false
       approvers: ""
       notifyAllEligibleUsers: false
