@@ -43,7 +43,7 @@ metadata:
         - Prod_Job_Jenkins
         - Parse_Release_Prod
         - Functional_Test_Prod
-        - RMO_Approval_Prod        
+        - RMO_Approval_Prod
 jobs:
   deploy-to-QA:
     steps:
@@ -54,6 +54,8 @@ jobs:
     needs:
       - Get_Incident_SysId
       - Exit_Preview_Approval
+      - CheckMarx_Scan
+      - Peformance_Test
   QA_Approval:
     timeout-minutes: 4320
     delegates: cloudbees-io/manual-approval/custom-job.yml@v1
@@ -64,7 +66,6 @@ jobs:
       notifyAllEligibleUsers: false
     needs: RMO_Approval
   AWS_Admin_Approval:
-    needs: QA_Approval
     timeout-minutes: 4320
     delegates: cloudbees-io/manual-approval/custom-job.yml@v1
     with:
@@ -72,8 +73,8 @@ jobs:
       disallowLaunchByUser: false
       approvers: ""
       notifyAllEligibleUsers: false
+    needs: QA_Approval
   Get_Incident_SysId:
-    needs: AWS_Admin_Approval
     steps:
       - with:
           content: |-
@@ -81,8 +82,8 @@ jobs:
             SysId = 110927861
         uses: cloudbees-io/publish-evidence-item@v1
         name: Incident handler
+    needs: AWS_Admin_Approval
   Functional_Test:
-    needs: deploy-to-Prod
     steps:
       - with:
           content: >-
@@ -189,8 +190,9 @@ jobs:
             - [ ] Blocked  
         uses: cloudbees-io/publish-evidence-item@v1
         name: Functioanal Test
+    needs: deploy-to-QA
   Peformance_Test:
-    needs: Functional_Test
+    needs: QA_Approval
     steps:
       - with:
           content: >-
@@ -475,9 +477,8 @@ jobs:
       disallowLaunchByUser: false
       approvers: ""
       notifyAllEligibleUsers: false
-    needs: CheckMarx_Scan
+    needs: Functional_Test
   QA_Exit_Approval:
-    needs: Code_Review_Doc
     timeout-minutes: 4320
     delegates: cloudbees-io/manual-approval/custom-job.yml@v1
     with:
@@ -485,6 +486,7 @@ jobs:
       disallowLaunchByUser: false
       approvers: ""
       notifyAllEligibleUsers: false
+    needs: Code_Review_Doc
   QA_Job_Jenkins:
     needs: Get_Incident_SysId
     steps:
@@ -746,6 +748,7 @@ jobs:
     needs:
       - Parse_Release_Preview
       - QA_Job_Jenkins
+      - RFC_From_Assyst_Prod
   Functional_Test_Preview:
     needs: deploy-to-Preview
     steps:
@@ -864,8 +867,7 @@ jobs:
       notifyAllEligibleUsers: false
     needs: Functional_Test_Preview
   RMO_Approval:
-    needs:
-      - Business_Approval
+    needs: Business_Approval
     timeout-minutes: 4320
     delegates: cloudbees-io/manual-approval/custom-job.yml@v1
     with:
@@ -873,7 +875,6 @@ jobs:
       disallowLaunchByUser: false
       approvers: ""
       notifyAllEligibleUsers: false
-
   Business_Approva_Prod:
     timeout-minutes: 4320
     delegates: cloudbees-io/manual-approval/custom-job.yml@v1
@@ -935,8 +936,11 @@ jobs:
     needs:
       - RMO_Approval
       - Get_Incident_SysId
+      - RMO_Approval_Prod
   Prod_Job_Jenkins:
-    needs: RFC_From_Assyst
+    needs:
+      - RFC_From_Assyst
+      - RFC_From_Assyst_Prod
     steps:
       - with:
           content: >-
@@ -1107,7 +1111,10 @@ jobs:
       - Parse_Release_Prod
       - QA_Job_Jenkins
   Functional_Test_Prod:
-    needs: deploy-to-Prod
+    needs:
+      - deploy-to-Prod
+      - CheckMarx_Scan
+      - RMO_Approval_Prod
     steps:
       - with:
           content: >-
@@ -1216,11 +1223,19 @@ jobs:
         name: Functioanal Test
   RMO_Approval_Prod:
     needs:
-      - Business_Approval_Prod
+      - Business_Approva_Prod
     timeout-minutes: 4320
     delegates: cloudbees-io/manual-approval/custom-job.yml@v1
     with:
       instructions: ""
       disallowLaunchByUser: false
       approvers: ""
-      notifyAllEligibleUsers: false      
+      notifyAllEligibleUsers: false
+  Business_Approval_Prod:
+    timeout-minutes: 4320
+    delegates: cloudbees-io/manual-approval/custom-job.yml@v1
+    with:
+      instructions: ""
+      disallowLaunchByUser: false
+      approvers: ""
+      notifyAllEligibleUsers: false
